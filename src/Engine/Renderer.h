@@ -21,6 +21,11 @@ namespace Weave
 
 			std::string rootDirectory;
 
+			const Mathematics::Vector2<float> WorldToPixelPos(Mathematics::Vector2<float> worldPos);
+			const Mathematics::Vector2<float> PixelToWorldPos(Mathematics::Vector2<float> worldPos);
+
+			const std::uint16_t pixelsPerUnit = 25;
+
 		public:
 			Renderer(sf::RenderWindow* window, std::string rootDirectory);
 			~Renderer();
@@ -28,6 +33,9 @@ namespace Weave
 			std::shared_ptr<sf::Texture> GetTexture(std::string textureName);
 
 			void RenderSprites(ECS::World& world);
+			void TargetCamera(Mathematics::Vector2<float> worldPos);
+
+			Mathematics::Vector2<float> ScreenToWorldPos(Mathematics::Vector2<float> screenPos);
 		};
 
         struct Sprite
@@ -37,5 +45,21 @@ namespace Weave
             Mathematics::Vector2<std::uint16_t> subTexSize;
         };
 
+		struct SpriteSheet
+		{
+			std::shared_ptr<sf::Texture> texture;
+			Mathematics::Vector2<uint16_t> cellSize;
+
+			Sprite GetSprite(uint16_t cellIndex)
+			{
+				div_t cellPosition = div(cellIndex, texture->getSize().x / cellSize.x);
+
+				if ((std::uint16_t)(cellPosition.quot * cellSize.y) >= texture->getSize().y) throw std::runtime_error("Cell index out of texture bounds.");
+
+				return { texture, Mathematics::Vector2<uint16_t>(cellPosition.rem * cellSize.x, cellPosition.quot * cellSize.y), cellSize };
+			}
+
+			SpriteSheet(std::shared_ptr<sf::Texture> _texture, Mathematics::Vector2<uint16_t> _cellSize) : texture(_texture), cellSize(_cellSize) { }
+		};
 	}
 }

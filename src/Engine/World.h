@@ -1,5 +1,6 @@
 #pragma once
 #include "Archetype.h"
+#include "Events.h"
 #include <unordered_map>
 #include <set>
 #include <typeindex>
@@ -83,42 +84,17 @@ namespace Weave
 
             Iterator end()
             {
+                if (archetypeViews.empty())
+                    return Iterator(&archetypeViews, 0, typename ArchetypeView<Components...>::Iterator(0, nullptr, {}));
+
                 return Iterator(&archetypeViews, archetypeViews.size(), archetypeViews.back().end());
             }
         };
 
-        using SystemGroupID = std::size_t;
-
         class World;
 
-        struct System
-        {
-        protected:
-            std::size_t hash;
-            std::function<void(World&)> function;
-
-        public:
-            System(std::function<void(World&)> func) : function(std::move(func)) 
-            {
-                typedef void(fnType)(World&);
-                fnType** fnPointer = function.template target<fnType*>();
-
-                if (fnPointer)
-                {
-                    hash = (size_t)*fnPointer;
-                    return;
-                }
-
-                hash = function.target_type().hash_code();
-            };
-
-            bool operator==(const System& other) { return hash == other.hash; }
-            bool operator!=(const System& other) { return hash != other.hash; }
-            bool operator<(const System& other) const { return hash < other.hash; }
-            constexpr std::size_t hash_code() const throw() { return hash; }
-
-            void operator()(World& world) { function(world); }
-        };
+        using SystemGroupID = std::size_t;
+        using SystemGroup = Utilities::Event<World&>;
 
 		class World
 		{
@@ -132,7 +108,7 @@ namespace Weave
 
             std::map<std::type_index, std::size_t> componentSizes;
 
-            std::vector<std::set<System>> systemGroups;
+            std::vector<SystemGroup> systemGroups;
 
             SystemGroupID nextSystemGroupID = 0;
             std::set<SystemGroupID> availableSystemGroupIDs;
@@ -176,9 +152,6 @@ namespace Weave
             template <typename... Components>
             void TransferEntity(EntityID entity, Archetype* newArchetype, Archetype* oldArchetype, Components&&... newComponents)
             {
-                ((std::cout << " " << typeid(Components).name()), ...);
-                std::cout << "\n";
-
                 if (!oldArchetype)
                 {
                     newArchetype->AddEntity(entity, std::forward<Components>(newComponents)...);
@@ -204,7 +177,6 @@ namespace Weave
                     void* newComponentPtr = static_cast<std::vector<std::byte>*>(newArchetype->GetComponentStore(typeIndex, typeSize).data)->data() + newEntityIndex * typeSize;
 
                     std::memcpy(newComponentPtr, oldComponentPtr, typeSize);
-
                 }
 
                 oldArchetype->RemoveEntity(entity);
@@ -220,9 +192,8 @@ namespace Weave
             void RetireSystemGroup(SystemGroupID systemGroup);
             bool IsSystemGroupRegistered(SystemGroupID systemGroup);
 
-            void RegisterSystem(std::function<void(World&)> system, SystemGroupID systemGroup);
-            void DeregisterSystem(std::function<void(World&)> system, SystemGroupID systemGroup);
-            void CallSystemGroup(SystemGroupID systemGroup);
+            SystemGroup& GetSystemGroup(SystemGroupID groupID);
+            void CallSystemGroup(SystemGroupID groupID);
 
             template <typename... Components>
             void AddComponents(EntityID entity)
@@ -233,9 +204,6 @@ namespace Weave
             template <typename... Components>
             void AddComponents(EntityID entity, Components... components)
             {
-                ((std::cout << typeid(Components).name() << " ", void()), ...);
-                std::cout << "\n";
-
                 ((componentSizes[typeid(Components)] = sizeof(Components)), ...);
 
                 std::set<ComponentData> newTypeSet;

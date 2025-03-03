@@ -3,9 +3,10 @@
 
 Weave::Engine::Engine(std::string windowName) : updateGroup(world.CreateSystemGroup()), renderer(Graphics::Renderer(&window, "Assets/"))
 {
-	window.create(sf::VideoMode({ 800, 600 }), windowName, sf::Style::Resize | sf::Style::Close, sf::State::Windowed);
+	window.create(sf::VideoMode({ 1360, 960 }), windowName, sf::Style::Close, sf::State::Windowed);
+    renderer.TargetCamera({0, 0});
 
-    world.RegisterSystem(std::bind(&Weave::Graphics::Renderer::RenderSprites, renderer, std::placeholders::_1), updateGroup);
+    world.GetSystemGroup(updateGroup).Subscribe(renderer, &Weave::Graphics::Renderer::RenderSprites);
 }
 
 Weave::Engine::~Engine() { }
@@ -20,20 +21,30 @@ Weave::Graphics::Renderer& Weave::Engine::GetRenderer()
     return renderer;
 }
 
+Weave::Input::InputHandler& Weave::Engine::GetInputHandler()
+{
+    return inputHandler;
+}
+
 void Weave::Engine::Run()
 {
     while (window.isOpen())
     {
+        window.clear(sf::Color::Black);
+
         while (const std::optional windowEvent = window.pollEvent())
         {
-            window.clear(sf::Color::Black);
-
             if (windowEvent->is<sf::Event::Closed>())
+            {
                 window.close();
+                return;
+            }
 
-            world.CallSystemGroup(updateGroup);
-
-            window.display();
+            inputHandler.HandleEvent(windowEvent.value());
         }
+
+        world.CallSystemGroup(updateGroup);
+
+        window.display();
     }
 }

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <concepts>
 #include <SFML/System/Vector2.hpp>
+#include <iostream>
 
 namespace Weave
 {
@@ -153,18 +154,16 @@ namespace Weave
             }
 
             template<Numeric T1, Numeric T2>
-            static float Angle(Vector2<T1> vectorA, Vector2<T2> vectorB)
+            static float Angle(Vector2<T1> pointA, Vector2<T2> pointB)
             {
-                return std::acos(Vector2::Dot(vectorA, vectorB) / (vectorA.GetMagnitude() * vectorB.GetMagnitude()));
+                Vector2<float> direction = pointB - pointA;
+                return std::atan2(direction.x, direction.y);
             }
 
             template<Numeric T1, Numeric T2>
             static float Dot(Vector2<T1> vectorA, Vector2<T2> vectorB)
             {
-                Vector2 unitA = vectorA.GetUnitVector();
-                Vector2 unitB = vectorB.GetUnitVector();
-
-                return unitA.x * unitB.x + unitA.y * unitB.y;
+                return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
             }
 		};
 

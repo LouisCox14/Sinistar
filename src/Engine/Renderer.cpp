@@ -2,26 +2,33 @@
 
 void Weave::Graphics::Renderer::RenderSprites(ECS::World& world)
 {
-	std::cout << "\n ----- RenderSprites / Start ----- \n";
-
 	for (auto [entity, transform, sprite] : world.GetView<Weave::Transform, Weave::Graphics::Sprite>())
 	{
-		std::cout << "[Renderer] Entity " << entity << " has a Sprite (this: " << &sprite << ").\n";
-		std::cout << "[Renderer] Sprite texture: " << sprite.texture << "\n";
-
-		std::cout << "[Renderer] Entity position: " << transform.position << "\n";
-		std::cout << "[Renderer] Entity scale: " << transform.scale << "\n";
-
 		sf::Sprite renderSprite(*sprite.texture, sf::IntRect(sprite.subTexOrigin, sprite.subTexSize));
 
-		renderSprite.setPosition(transform.position);
+		renderSprite.setOrigin(sprite.subTexSize / 2);
+		renderSprite.setPosition(WorldToPixelPos(transform.position));
 		renderSprite.setRotation(sf::degrees(transform.rotation));
 		renderSprite.setScale(transform.scale);
 
 		window->draw(renderSprite);
 	}
+}
 
-	std::cout << "\n ----- RenderSprites / End ----- \n";
+void Weave::Graphics::Renderer::TargetCamera(Mathematics::Vector2<float> worldPos)
+{
+	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { 320.f, 240.f }));
+	camera.setCenter(WorldToPixelPos(worldPos));
+	window->setView(camera);
+}
+
+Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::ScreenToWorldPos(Weave::Mathematics::Vector2<float> screenPos)
+{
+	screenPos /= Weave::Mathematics::Vector2<unsigned>(window->getSize());
+	screenPos *= Weave::Mathematics::Vector2<float>(window->getView().getSize());
+	screenPos -= Weave::Mathematics::Vector2<float>(window->getView().getCenter() + (window->getView().getSize() / 2.0f));
+
+	return PixelToWorldPos(screenPos);
 }
 
 std::shared_ptr<sf::Texture> Weave::Graphics::Renderer::GetTexture(std::string textureName)
@@ -31,6 +38,20 @@ std::shared_ptr<sf::Texture> Weave::Graphics::Renderer::GetTexture(std::string t
 	textures[textureName] = std::make_shared<sf::Texture>(rootDirectory + textureName);
 
 	return textures[textureName];
+}
+
+const Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::WorldToPixelPos(Weave::Mathematics::Vector2<float> worldPos)
+{
+	Mathematics::Vector2<float> adjustedPosition = worldPos * (float)pixelsPerUnit;
+	adjustedPosition.y *= -1;
+	return adjustedPosition;
+}
+
+const Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::PixelToWorldPos(Weave::Mathematics::Vector2<float> worldPos)
+{
+	Mathematics::Vector2<float> adjustedPosition = worldPos / (float)pixelsPerUnit;
+	adjustedPosition.y *= -1;
+	return adjustedPosition;
 }
 
 Weave::Graphics::Renderer::Renderer(sf::RenderWindow* _window, std::string _rootDirectory) : window(_window), rootDirectory(_rootDirectory) { }

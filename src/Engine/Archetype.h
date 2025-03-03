@@ -104,14 +104,41 @@ namespace Weave
             std::unordered_map<std::type_index, ComponentStore> components;
             std::set<std::type_index> validTypes;
 
+            size_t GetEntityIndex(EntityID entity) {
+                auto it = std::find(entities.begin(), entities.end(), entity);
+
+                if (it == entities.end())
+                {
+                    throw std::runtime_error("Entity not found in archetype");
+                }
+
+                return std::distance(entities.begin(), it);
+            }
+
+            void RemoveEntityAt(size_t index) {
+                size_t last = entities.size() - 1;
+                if (index != last)
+                {
+                    entities[index] = entities[last];
+
+                    for (auto& [type, store] : components)
+                    {
+                        auto& componentVec = *static_cast<std::vector<std::byte>*>(store.data);
+                        std::memcpy(&componentVec[index], &componentVec[last], store.componentSize);
+                    }
+                }
+
+                entities.pop_back();
+                for (auto& [type, store] : components) {
+                    static_cast<std::vector<std::byte>*>(store.data)->pop_back();
+                }
+            }
+
         public:
             explicit Archetype(const std::set<ComponentData> types)
             {
-                std::cout << "\n ----- CREATING ARCHETYPE ----- \n";
-
                 for (const auto& type : types)
                 {
-                    std::cout << "[ECS] Allocating component vector of size " << type.size << " for " << type.index.name() << "\n";
                     components[type.index] = { new std::vector<std::byte>(), type.size };
                     validTypes.insert(type.index);
                 }
@@ -154,9 +181,6 @@ namespace Weave
                     componentVector->resize(entities.size() * componentPair.second.componentSize);
                 }
 
-                ((std::cout << " " << typeid(Components).name()), ...);
-                std::cout << "\n";
-
                 (GetComponentVector<Components>().emplace_back(std::move(componentData)), ...);
             }
 
@@ -178,7 +202,7 @@ namespace Weave
 
             void* GetComponent(EntityID entity, std::type_index typeIndex)
             {
-                size_t index = GetEntityIndex(entity) + 1;
+                size_t index = GetEntityIndex(entity);
 
                 if (!components.contains(typeIndex)) return nullptr;
 
@@ -193,28 +217,19 @@ namespace Weave
             template <typename Component>
             std::vector<Component>& GetComponentVector() 
             {
-                std::cout << "\n ----- GetComponentVector / Start ----- \n";
-
                 std::type_index type = typeid(Component);
-                if (validTypes.find(type) == validTypes.end()) 
+                if (validTypes.find(type) == validTypes.end())
                 {
                     throw std::runtime_error("Invalid component type for this archetype");
                 }
 
                 if (components[type].data == nullptr)
                 {
-                    std::cout << "\nAllocating new Component Vector!\n";
                     components[type].data = new std::vector<Component>();
                     components[type].componentSize = sizeof(Component);
                 }
 
                 std::vector<Component>* vec = static_cast<std::vector<Component>*>(components[type].data);
-
-                std::cout << "[ECS] Getting component vector of type: " << typeid(Component).name() << "\n";
-                std::cout << "[ECS] Vector is currently of size: " << vec->size() << "\n";
-                std::cout << "[ECS] Vector is stored at address: " << vec->data() << "\n";
-
-                std::cout << "\n ----- GetComponentVector / End ----- \n";
 
                 return *vec;
             }
@@ -235,39 +250,6 @@ namespace Weave
 
                 return components[type];
             }
-
-        private:
-
-            size_t GetEntityIndex(EntityID entity) {
-                auto it = std::find(entities.begin(), entities.end(), entity);
-
-                if (it == entities.end()) 
-                {
-                    throw std::runtime_error("Entity not found in archetype");
-                }
-
-                return std::distance(entities.begin(), it);
-            }
-
-            void RemoveEntityAt(size_t index) {
-                size_t last = entities.size() - 1;
-                if (index != last) 
-                {
-                    entities[index] = entities[last];
-
-                    for (auto& [type, store] : components) 
-                    {
-                        auto& componentVec = *static_cast<std::vector<std::byte>*>(store.data);
-                        std::memcpy(&componentVec[index], &componentVec[last], store.componentSize);
-                    }
-                }
-
-                entities.pop_back();
-                for (auto& [type, store] : components) {
-                    static_cast<std::vector<std::byte>*>(store.data)->pop_back();
-                }
-            }
         };
-
 	}
 }

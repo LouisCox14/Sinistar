@@ -55,27 +55,16 @@ bool Weave::ECS::World::IsSystemGroupRegistered(Weave::ECS::SystemGroupID system
 	return true;
 }
 
-void Weave::ECS::World::RegisterSystem(std::function<void(World&)> function, Weave::ECS::SystemGroupID systemGroup)
+Weave::ECS::SystemGroup& Weave::ECS::World::GetSystemGroup(SystemGroupID groupID)
 {
-	if (!IsSystemGroupRegistered(systemGroup)) throw std::logic_error("System group does not exist.");
+	if (!IsSystemGroupRegistered(groupID)) throw std::logic_error("System is not registered.");
 
-	systemGroups[systemGroup].insert(System(function));
+	return systemGroups[groupID];
 }
 
-void Weave::ECS::World::DeregisterSystem(std::function<void(World&)> function, Weave::ECS::SystemGroupID systemGroup)
+void Weave::ECS::World::CallSystemGroup(Weave::ECS::SystemGroupID groupID)
 {
-	if (!IsSystemGroupRegistered(systemGroup)) return;
+	if (!IsSystemGroupRegistered(groupID)) return;
 
-	systemGroups[systemGroup].erase(System(function));
-}
-
-
-void Weave::ECS::World::CallSystemGroup(Weave::ECS::SystemGroupID systemGroup)
-{
-	if (!IsSystemGroupRegistered(systemGroup)) return;
-
-	for (System system : systemGroups[systemGroup])
-	{
-		system(*this);
-	}
+	systemGroups[groupID](*this);
 }
