@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Physics.h"
 
 void Weave::Graphics::Renderer::RenderSprites(ECS::World& world)
 {

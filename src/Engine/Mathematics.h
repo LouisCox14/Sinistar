@@ -15,6 +15,7 @@ namespace Weave
         concept FloatingPoint = std::is_floating_point_v<T>;
 
 		const double pi = 3.1415926535897932384;
+        const float infinity = std::numeric_limits<float>::infinity();
 
 		template<Numeric T = float>
 		struct Vector2
@@ -153,17 +154,23 @@ namespace Weave
                 return Vector2(static_cast<T>(this->x - operand.x), static_cast<T>(this->y - operand.y));
             }
 
-            template<Numeric T1, Numeric T2>
-            static float Angle(Vector2<T1> pointA, Vector2<T2> pointB)
+            template<Numeric T>
+            static float Angle(Vector2<T> pointA, Vector2<T> pointB)
             {
                 Vector2<float> direction = pointB - pointA;
                 return std::atan2(direction.x, direction.y);
             }
 
-            template<Numeric T1, Numeric T2>
-            static float Dot(Vector2<T1> vectorA, Vector2<T2> vectorB)
+            template<Numeric T>
+            static float Dot(Vector2<T> vectorA, Vector2<T> vectorB)
             {
                 return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
+            }
+
+            template<Numeric T>
+            static Vector2<T> MidPoint(Vector2<T> vectorA, Vector2<T> vectorB)
+            {
+                return (vectorA + vectorB) / 2.0f;
             }
 		};
 

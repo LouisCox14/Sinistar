@@ -9,10 +9,17 @@ namespace Weave
 	namespace Utilities
 	{
 		template<typename ListenerType, typename FunctionType, typename... ArgTypes>
-		concept ValidFunction = requires(FunctionType f, ListenerType & l, ArgTypes... args)
+		concept ValidMemberFunction = requires(FunctionType f, ListenerType & l, ArgTypes... args)
 		{
 			// This concept ensures that functions subscribing to the event can be called and do have the correct arguments and return type.
 			{ std::invoke(f, l, args...) };
+		};
+
+		template<typename FunctionType, typename... ArgTypes>
+		concept ValidFunction = requires(FunctionType f, ArgTypes... args)
+		{
+			// This concept ensures that functions subscribing to the event can be called and do have the correct arguments and return type.
+			{ std::invoke(f, args...) };
 		};
 
 		template<typename... ArgTypes>
@@ -35,7 +42,7 @@ namespace Weave
 			}
 
 			template<class ListenerType, class FunctionType>
-			requires ValidFunction<ListenerType, FunctionType, ArgTypes...>
+			requires ValidMemberFunction<ListenerType, FunctionType, ArgTypes...>
 			void Subscribe(ListenerType& listener, FunctionType&& function)
 			{
 				// This function lets other functions be bound to the event, meaning they are called when the event is invoked.
@@ -51,6 +58,7 @@ namespace Weave
 			}
 
 			template <typename FunctionType>
+			requires ValidFunction<FunctionType, ArgTypes...>
 			void Subscribe(FunctionType&& function)
 			{
 				// This override ensures that static and non member functions can be used with the event class.
@@ -61,7 +69,7 @@ namespace Weave
 			}
 
 			template<class ListenerType, class FunctionType>
-			requires ValidFunction<ListenerType, FunctionType, ArgTypes...>
+			requires ValidMemberFunction<ListenerType, FunctionType, ArgTypes...>
 			void Unsubscribe(ListenerType& listener, FunctionType&& function)
 			{
 				// This function lets functions bound to this event unsubscribe so that they are no longer called when it is invoked.
@@ -78,6 +86,7 @@ namespace Weave
 			}
 
 			template<class FunctionType>
+			requires ValidFunction<FunctionType, ArgTypes...>
 			void Unsubscribe(FunctionType&& function)
 			{
 				if (isRunning) throw std::logic_error("Cannot unsubscribe from an event whilst it is running.");
@@ -90,7 +99,7 @@ namespace Weave
 			}
 
 			template<class ListenerType, class FunctionType>
-			requires ValidFunction<ListenerType, FunctionType, ArgTypes...>
+			requires ValidMemberFunction<ListenerType, FunctionType, ArgTypes...>
 			bool IsSubscribed(ListenerType& listener, FunctionType&& function)
 			{
 				static_assert(!std::is_pointer<ListenerType>::value, "Listener cannot be passed as a pointer.");

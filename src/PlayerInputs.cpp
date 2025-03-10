@@ -9,7 +9,8 @@ void PlayerInputs::HandleMouseMoved(Weave::Mathematics::Vector2<float> mousePos)
 {
 	for (auto [entity, transform, tag] : engine.GetWorld().GetView<Weave::Transform, PlayerTag>())
 	{
-		transform.rotation = Weave::Mathematics::RadiansToDegrees(Weave::Mathematics::Vector2<float>::Angle(transform.position, engine.GetRenderer().ScreenToWorldPos(mousePos)));
+		transform.position = engine.GetRenderer().ScreenToWorldPos(mousePos);
+		//transform.rotation = Weave::Mathematics::RadiansToDegrees(Weave::Mathematics::Vector2<float>::Angle(transform.position, engine.GetRenderer().ScreenToWorldPos(mousePos)));
 	}
 }
 

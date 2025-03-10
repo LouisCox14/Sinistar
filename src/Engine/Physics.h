@@ -1,53 +1,68 @@
 #pragma once
 #include <variant>
 #include "Mathematics.h"
+#include "Transform.h"
+#include "ECS.h"
+#include "Shapes.h"
 
 namespace Weave
 {
 	namespace Physics
 	{
-        struct Rectangle 
+        class PhysicsHandler
         {
-            Mathematics::Vector2<float> min;
-            Mathematics::Vector2<float> max;
-        };
+        private:
+            float gravity;
 
-        struct Circle 
-        {
-            Mathematics::Vector2<float> center;
-            float radius;
-        };
+        public:
+            PhysicsHandler(float gravity);
 
-        struct Line 
-        {
-            Mathematics::Vector2<float> start;
-            Mathematics::Vector2<float> end;
+            void HandlePhysics(ECS::World& world);
         };
 
         struct Collider
         {
-            std::variant<Rectangle, Circle, Line> shape;
+            std::variant<Shapes::Rectangle, Shapes::Circle, Shapes::Line> shape;
+        };
+
+        struct PhysicsMaterial
+        {
+            float friction;
+            float bounciness;
+            float drag;
         };
 
 		struct Rigidbody
 		{
 			Mathematics::Vector2<float> velocity;
             Collider collider;
+            PhysicsMaterial material;
 		};
 
         bool Collides(Collider lhs, Collider rhs);
 
-        bool Collides(Rectangle lhs, Rectangle rhs);
-        bool Collides(Rectangle lhs, Circle rhs);
-        bool Collides(Rectangle lhs, Line rhs);
-        bool Collides(Circle lhs, Circle rhs);
-        bool Collides(Circle lhs, Line rhs);
-        bool Collides(Line lhs, Line rhs);
+        bool Collides(Shapes::Rectangle lhs, Shapes::Rectangle rhs);
+        bool Collides(Shapes::Rectangle lhs, Shapes::Circle rhs);
+        bool Collides(Shapes::Rectangle lhs, Shapes::Line rhs);
+        bool Collides(Shapes::Circle lhs, Shapes::Circle rhs);
+        bool Collides(Shapes::Circle lhs, Shapes::Line rhs);
+        bool Collides(Shapes::Line lhs, Shapes::Line rhs);
+
+        // Overriding for point checks.
+
+        bool Collides(Mathematics::Vector2<float> point, Shapes::Rectangle collider);
+        bool Collides(Mathematics::Vector2<float> point, Shapes::Circle collider);
 
         // Overriding for alternate parameter orders.
 
-        bool Collides(Circle lhs, Rectangle rhs);
-        bool Collides(Line lhs, Rectangle rhs);
-        bool Collides(Line lhs, Circle rhs);
+        bool Collides(Shapes::Circle lhs, Shapes::Rectangle rhs);
+        bool Collides(Shapes::Line lhs, Shapes::Rectangle rhs);
+        bool Collides(Shapes::Line lhs, Shapes::Circle rhs);
+
+        Collider TranslateCollider(Collider collider, Mathematics::Vector2<float> offset);
+
+        Collider TranslateCollider(Shapes::Rectangle collider, Mathematics::Vector2<float> offset);
+        Collider TranslateCollider(Shapes::Circle collider, Mathematics::Vector2<float> offset);
+        Collider TranslateCollider(Shapes::Line collider, Mathematics::Vector2<float> offset);
 	}
 }
