@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include <optional>
+#include <string>
 
 Weave::Engine::Engine(std::string windowName) : updateGroup(world.CreateSystemGroup()), renderer(Graphics::Renderer(&window, "Assets/"))
 {
@@ -28,6 +29,9 @@ Weave::Input::InputHandler& Weave::Engine::GetInputHandler()
 
 void Weave::Engine::Run()
 {
+    std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+    uint32_t frames = 0;
+
     while (window.isOpen())
     {
         window.clear(sf::Color::Black);
@@ -46,5 +50,17 @@ void Weave::Engine::Run()
         world.CallSystemGroup(updateGroup);
 
         window.display();
+
+        frames++;
+
+        float currentTime = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - startTime).count();
+
+        if (currentTime > 1.0f)
+        {
+            window.setTitle(std::to_string(frames) + "fps");
+
+            startTime = std::chrono::high_resolution_clock::now();
+            frames = 0;
+        }
     }
 }

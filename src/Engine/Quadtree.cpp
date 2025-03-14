@@ -22,7 +22,7 @@ void Weave::QuadTree::PushObject(ObjectID object)
 			continue;
 		}
 
-		if (nodes[currentNodeID].objects.size() <= maxObjects)
+		if (nodes[currentNodeID].objects.size() <= maxObjects || nodes[currentNodeID].layer >= maxLayers)
 		{
 			nodes[currentNodeID].objects.emplace_back(object);
 			continue;
@@ -32,10 +32,10 @@ void Weave::QuadTree::PushObject(ObjectID object)
 
 		Weave::Mathematics::Vector2<float> nodeCenter = (nodes[currentNodeID].bounds.min + nodes[currentNodeID].bounds.max) / 2;
 
-		nodes.emplace_back(Node({ nodes[currentNodeID].bounds.min, nodeCenter }));
-		nodes.emplace_back(Node({ nodeCenter, nodes[currentNodeID].bounds.max }));
-		nodes.emplace_back(Node({ { nodeCenter.x, nodes[currentNodeID].bounds.min.y }, { nodes[currentNodeID].bounds.max.x, nodeCenter.y } }));
-		nodes.emplace_back(Node({ { nodes[currentNodeID].bounds.min.x, nodeCenter.y }, { nodeCenter.x, nodes[currentNodeID].bounds.max.y } }));
+		nodes.emplace_back(Node({ nodes[currentNodeID].bounds.min, nodeCenter }, nodes[currentNodeID].layer + 1));
+		nodes.emplace_back(Node({ nodeCenter, nodes[currentNodeID].bounds.max }, nodes[currentNodeID].layer + 1));
+		nodes.emplace_back(Node({ { nodeCenter.x, nodes[currentNodeID].bounds.min.y }, { nodes[currentNodeID].bounds.max.x, nodeCenter.y } }, nodes[currentNodeID].layer + 1));
+		nodes.emplace_back(Node({ { nodes[currentNodeID].bounds.min.x, nodeCenter.y }, { nodeCenter.x, nodes[currentNodeID].bounds.max.y } }, nodes[currentNodeID].layer + 1));
 
 		nodes[currentNodeID].children[0] = nodes.size() - 1;
 		nodes[currentNodeID].children[1] = nodes.size() - 2;
@@ -57,7 +57,7 @@ void Weave::QuadTree::PushObject(ObjectID object)
 	}
 }
 
-void Weave::QuadTree::QueryNode(Physics::Collider queryCollider, NodeID nodeID, std::vector<std::pair<ECS::EntityID, Physics::Collider>>& queryConsiderations)
+void Weave::QuadTree::QueryNode(Physics::Collider queryCollider, NodeID nodeID, std::unordered_set<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>, ObjectHash, ObjectEqual>& queryConsiderations)
 {
 	const Node& node = nodes[nodeID];
 
@@ -69,7 +69,7 @@ void Weave::QuadTree::QueryNode(Physics::Collider queryCollider, NodeID nodeID, 
 		const auto& [entity, collider] = objects[objectID];
 		if (Physics::Collides(queryCollider, collider))
 		{
-			queryConsiderations.emplace_back(entity, collider);
+			queryConsiderations.insert({ entity, collider });
 		}
 	}
 
@@ -85,9 +85,9 @@ void Weave::QuadTree::QueryNode(Physics::Collider queryCollider, NodeID nodeID, 
 	}
 }
 
-Weave::QuadTree::QuadTree(Shapes::Rectangle bounds, std::uint16_t _maxObjects) : maxObjects(_maxObjects), root(0) 
+Weave::QuadTree::QuadTree(Shapes::Rectangle bounds, std::uint16_t _maxObjects, std::uint16_t _maxLayers) : maxObjects(_maxObjects), root(0),  maxLayers(_maxLayers)
 {
-	nodes.push_back(Node(bounds));
+	nodes.push_back(Node(bounds, 0));
 }
 
 void Weave::QuadTree::Insert(ECS::EntityID entity, Physics::Collider collider)
@@ -98,13 +98,66 @@ void Weave::QuadTree::Insert(ECS::EntityID entity, Physics::Collider collider)
 	PushObject(newObject);
 }
 
+void Weave::QuadTree::Reserve(std::size_t space)
+{
+	objects.reserve(space);
+	nodes.reserve(space / maxObjects);
+}
+
 std::vector<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>> Weave::QuadTree::Query(Physics::Collider queryCollider)
 {
-	std::vector<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>> queryConsiderations; // TODO: Update to use a set to avoid duplicate collisions. Remember, entities appear in all leaves they intersect.
+	std::unordered_set<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>, ObjectHash, ObjectEqual> queryConsiderations;
 
 	QueryNode(queryCollider, root, queryConsiderations);
 
-	return queryConsiderations;
+	return std::vector<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>>(queryConsiderations.begin(), queryConsiderations.end());
 }
 
-Weave::Node::Node(Shapes::Rectangle _bounds) : bounds(_bounds) { }
+std::vector<Weave::QuadTree::NodeID> Weave::QuadTree::GetAllLeafNodes() const
+{
+    std::vector<NodeID> leafNodes;
+    std::queue<NodeID> nodesToProcess;
+    nodesToProcess.push(root);
+
+    while (!nodesToProcess.empty())
+    {
+        NodeID currentNodeID = nodesToProcess.front();
+        nodesToProcess.pop();
+
+        const Node& currentNode = nodes[currentNodeID];
+
+        if (currentNode.isLeaf)
+        {
+            leafNodes.push_back(currentNodeID);
+        }
+        else
+        {
+            for (NodeID childID : currentNode.children)
+            {
+                if (childID != NullNode)
+                {
+                    nodesToProcess.push(childID);
+                }
+            }
+        }
+    }
+
+    return leafNodes;
+}
+
+std::vector<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>> Weave::QuadTree::GetLeafObjects(NodeID leafNode)
+{
+	Node& node = nodes[leafNode];
+
+	if (!node.isLeaf) return std::vector<std::pair<Weave::ECS::EntityID, Weave::Physics::Collider>>();
+
+	std::vector<std::pair<ECS::EntityID, Physics::Collider>> returnObjects;
+	returnObjects.reserve(node.objects.size());
+
+	for (ObjectID id : node.objects)
+		returnObjects.emplace_back(objects[id]);
+
+	return returnObjects;
+}
+
+Weave::Node::Node(Shapes::Rectangle _bounds, std::uint16_t _layer) : bounds(_bounds), layer(_layer) { }

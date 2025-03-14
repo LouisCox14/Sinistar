@@ -37,9 +37,9 @@ int main()
 	testTransform.scale = { 0.25f, 0.25f };
 
 	std::default_random_engine gen;
-	std::uniform_real_distribution<float> distribution(-5, 5);
+	std::uniform_real_distribution<float> distribution(-10, 10);
 
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		testTransform.position = { distribution(gen), distribution(gen) };
 

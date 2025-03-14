@@ -24,9 +24,9 @@ namespace Weave
             Utilities::Event<Mathematics::Vector2<float>> onMouseMove;
 
         public:
-            Weave::Utilities::Event<>& GetEvent(sf::Keyboard::Scancode key, InputType type);
-            Weave::Utilities::Event<>& GetEvent(sf::Mouse::Button button, InputType type);
-            Weave::Utilities::Event<Weave::Mathematics::Vector2<float>>& GetMouseMoveEvent();
+            Utilities::Event<>& GetEvent(sf::Keyboard::Scancode key, InputType type);
+            Utilities::Event<>& GetEvent(sf::Mouse::Button button, InputType type);
+            Utilities::Event<Weave::Mathematics::Vector2<float>>& GetMouseMoveEvent();
 
             void HandleEvent(const sf::Event event);
         };

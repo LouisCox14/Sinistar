@@ -41,14 +41,14 @@ std::shared_ptr<sf::Texture> Weave::Graphics::Renderer::GetTexture(std::string t
 	return textures[textureName];
 }
 
-const Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::WorldToPixelPos(Weave::Mathematics::Vector2<float> worldPos)
+Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::WorldToPixelPos(Weave::Mathematics::Vector2<float> worldPos) const
 {
 	Mathematics::Vector2<float> adjustedPosition = worldPos * (float)pixelsPerUnit;
 	adjustedPosition.y *= -1;
 	return adjustedPosition;
 }
 
-const Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::PixelToWorldPos(Weave::Mathematics::Vector2<float> worldPos)
+Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::PixelToWorldPos(Weave::Mathematics::Vector2<float> worldPos) const
 {
 	Mathematics::Vector2<float> adjustedPosition = worldPos / (float)pixelsPerUnit;
 	adjustedPosition.y *= -1;

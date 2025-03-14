@@ -21,8 +21,8 @@ namespace Weave
 
 			std::string rootDirectory;
 
-			const Mathematics::Vector2<float> WorldToPixelPos(Mathematics::Vector2<float> worldPos);
-			const Mathematics::Vector2<float> PixelToWorldPos(Mathematics::Vector2<float> worldPos);
+			Mathematics::Vector2<float> WorldToPixelPos(Mathematics::Vector2<float> worldPos) const;
+			Mathematics::Vector2<float> PixelToWorldPos(Mathematics::Vector2<float> worldPos) const;
 
 			const std::uint16_t pixelsPerUnit = 25;
 
