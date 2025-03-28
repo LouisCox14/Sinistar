@@ -89,6 +89,18 @@ namespace Weave
 
                 return Iterator(&archetypeViews, archetypeViews.size(), archetypeViews.back().end());
             }
+
+            std::size_t GetEntityCount()
+            {
+                std::size_t count = 0;
+
+                for (ArchetypeView<Components...> archetypeView : archetypeViews)
+                {
+                    count += archetypeView.GetEntityCount();
+                }
+
+                return count;
+            }
         };
 
         class World;
@@ -159,18 +171,16 @@ namespace Weave
                     return;
                 }
 
-                std::vector<std::type_index> oldComponentTypes;
-                for (const auto& component : oldArchetype->GetComponentTypes())
-                {
-                    oldComponentTypes.push_back(component);
-                }
-
                 newArchetype->AddEntity(entity, std::forward<Components>(newComponents)...);
 
                 std::size_t newEntityIndex = newArchetype->GetEntityVector().size() - 1;
 
+                std::set<std::type_index> newTypes = newArchetype->GetComponentTypes();
+
                 for (std::type_index typeIndex : oldArchetype->GetComponentTypes())
                 {
+                    if (!newTypes.contains(typeIndex)) continue;
+
                     std::size_t typeSize = componentSizes[typeIndex];
 
                     void* oldComponentPtr = oldArchetype->GetComponent(entity, typeIndex);
@@ -195,6 +205,32 @@ namespace Weave
             SystemGroup& GetSystemGroup(SystemGroupID groupID);
             void CallSystemGroup(SystemGroupID groupID);
 
+            template <typename Component>
+            Component* GetComponent(EntityID entity)
+            {
+                if (!entityToArchetype.contains(entity)) return nullptr;
+
+                Archetype* entityArchetype = entityToArchetype[entity];
+
+                if (!entityArchetype->GetComponentTypes().contains(typeid(Component))) return nullptr;
+
+                return entityArchetype->GetComponent<Component>(entity);
+            }
+
+            template <typename Component>
+            bool HasComponent(EntityID entity)
+            {
+                if (!entityToArchetype.contains(entity)) return false;
+
+                return entityToArchetype[entity]->GetComponentTypes().contains(typeid(Component));
+            }
+
+            template <typename Component>
+            void AddComponent(EntityID entity, Component component = Component())
+            {
+                AddComponents(entity, component);
+            }
+
             template <typename... Components>
             void AddComponents(EntityID entity)
             {
@@ -209,16 +245,25 @@ namespace Weave
                 std::set<ComponentData> newTypeSet;
                 Archetype* oldArchetype = nullptr;
 
-                if (entityToArchetype.contains(entity)) {
+                if (entityToArchetype.contains(entity)) 
+                {
                     oldArchetype = entityToArchetype[entity];
                     newTypeSet = oldArchetype->GetComponentData();
                 }
 
-                (newTypeSet.insert({ typeid(Components), sizeof(Components)}), ...);
+                (newTypeSet.insert({ typeid(Components), sizeof(Components) }), ...);
 
                 Archetype* newArchetype = &GetArchetype(newTypeSet);
 
+                if (newArchetype == oldArchetype) return;
+
                 TransferEntity(entity, newArchetype, oldArchetype, std::forward<Components>(components)...);
+            }
+
+            template <typename Component>
+            void RemoveComponent(EntityID entity)
+            {
+                RemoveComponents<Component>(entity);
             }
 
             template <typename... Components>
@@ -226,11 +271,14 @@ namespace Weave
             {
                 if (!entityToArchetype.contains(entity)) return;
 
-                Archetype* oldArchetype = entityToArchetype[entity];
-                std::set<std::type_index> newTypeSet = oldArchetype->GetComponentTypes();
-                (newTypeSet.erase(typeid(Components)), ...);
+                std::set<ComponentData> newTypeSet;
 
-                Archetype* newArchetype = GetArchetype(newTypeSet);
+                Archetype* oldArchetype = entityToArchetype[entity];
+                newTypeSet = oldArchetype->GetComponentData();
+
+                (newTypeSet.erase({ typeid(Components), sizeof(Components) }), ...);
+
+                Archetype* newArchetype = &GetArchetype(newTypeSet);
 
                 TransferEntity(entity, newArchetype, oldArchetype);
             }

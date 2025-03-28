@@ -20,6 +20,8 @@ int main()
 
 	Weave::Physics::Rigidbody playerRigidbody;
 	playerRigidbody.collider.shape = Weave::Shapes::Circle(Weave::Mathematics::Vector2(0, 0), 0.25f);
+	playerRigidbody.collider.layers = Weave::Physics::CollisionLayer::Layer1;
+	playerRigidbody.collider.layerMask = Weave::Physics::CollisionLayer::Layer2;
 
 	Weave::ECS::EntityID player = engine.GetWorld().CreateEntity();
 	engine.GetWorld().AddComponents<PlayerTag, Weave::Transform, Weave::Graphics::Sprite, Weave::Physics::Rigidbody>(
@@ -32,6 +34,8 @@ int main()
 
 	Weave::Physics::Rigidbody testRigidbody;
 	testRigidbody.collider.shape = Weave::Shapes::Circle(Weave::Mathematics::Vector2(0, 0), 0.25f);
+	testRigidbody.collider.layers = Weave::Physics::CollisionLayer::Layer2;
+	testRigidbody.collider.layerMask = Weave::Physics::CollisionLayer::Layer1;
 
 	Weave::Transform testTransform;
 	testTransform.scale = { 0.25f, 0.25f };
@@ -39,7 +43,7 @@ int main()
 	std::default_random_engine gen;
 	std::uniform_real_distribution<float> distribution(-10, 10);
 
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		testTransform.position = { distribution(gen), distribution(gen) };
 

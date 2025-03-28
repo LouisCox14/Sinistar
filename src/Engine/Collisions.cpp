@@ -2,6 +2,8 @@
 
 bool Weave::Physics::Collides(Weave::Physics::Collider lhs, Weave::Physics::Collider rhs)
 {
+	if (!(lhs.layerMask & rhs.layers).any()) return false;
+
 	return std::visit([](auto&& a, auto&& b) { return Collides(a, b); }, lhs.shape, rhs.shape);
 }
 
@@ -93,7 +95,8 @@ bool Weave::Physics::Collides(Shapes::Line lhs, Shapes::Circle rhs)
 
 Weave::Physics::Collider Weave::Physics::TranslateCollider(Collider collider, Mathematics::Vector2<float> offset)
 {
-	return std::visit([&offset](auto&& a) { return TranslateCollider(a, offset); }, collider.shape);
+	collider.shape = std::visit([&offset](auto&& a) { return TranslateCollider(a, offset); }, collider.shape).shape;
+	return collider;
 }
 
 Weave::Physics::Collider Weave::Physics::TranslateCollider(Shapes::Rectangle collider, Mathematics::Vector2<float> offset)

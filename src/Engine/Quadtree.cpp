@@ -10,7 +10,7 @@ void Weave::QuadTree::PushObject(ObjectID object)
 		NodeID currentNodeID = nodesToProcess.front();
 		nodesToProcess.pop();
 
-		if (!Physics::Collides(objects[object].second, Physics::Collider(nodes[currentNodeID].bounds))) continue;
+		if (!Physics::Collides(Physics::Collider(nodes[currentNodeID].bounds), objects[object].second)) continue;
 
 		if (!nodes[currentNodeID].isLeaf)
 		{
@@ -46,7 +46,7 @@ void Weave::QuadTree::PushObject(ObjectID object)
 		{
 			for (NodeID childID : nodes[currentNodeID].children)
 			{
-				if (childID != NullNode && Physics::Collides(objects[objectID].second, Physics::Collider(nodes[childID].bounds)))
+				if (childID != NullNode && Physics::Collides(Physics::Collider(nodes[childID].bounds), objects[objectID].second))
 					nodes[childID].objects.emplace_back(objectID);
 			}
 		}
@@ -61,7 +61,7 @@ void Weave::QuadTree::QueryNode(Physics::Collider queryCollider, NodeID nodeID, 
 {
 	const Node& node = nodes[nodeID];
 
-	if (!Physics::Collides(queryCollider, Physics::Collider(node.bounds)))
+	if (!Physics::Collides(Physics::Collider(node.bounds), queryCollider))
 		return;
 
 	for (ObjectID objectID : node.objects)

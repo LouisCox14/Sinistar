@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <set>
 #include <iostream>
+#include <mutex>
 
 namespace Weave
 {
@@ -74,6 +75,11 @@ namespace Weave
 
 			Iterator begin() { return Iterator(0, entities, componentVectors); }
 			Iterator end() { return Iterator(entities->size(), entities, componentVectors); }
+
+            std::size_t GetEntityCount()
+            {
+                return entities->size();
+            }
 		};
 
         struct ComponentStore
@@ -104,7 +110,10 @@ namespace Weave
             std::unordered_map<std::type_index, ComponentStore> components;
             std::set<std::type_index> validTypes;
 
-            size_t GetEntityIndex(EntityID entity) {
+            std::mutex mutex;
+
+            size_t GetEntityIndex(EntityID entity) 
+            {
                 auto it = std::find(entities.begin(), entities.end(), entity);
 
                 if (it == entities.end())
@@ -115,7 +124,8 @@ namespace Weave
                 return std::distance(entities.begin(), it);
             }
 
-            void RemoveEntityAt(size_t index) {
+            void RemoveEntityAt(size_t index) 
+            {
                 size_t last = entities.size() - 1;
                 if (index != last)
                 {
@@ -123,14 +133,15 @@ namespace Weave
 
                     for (auto& [type, store] : components)
                     {
-                        auto& componentVec = *static_cast<std::vector<std::byte>*>(store.data);
-                        std::memcpy(&componentVec[index], &componentVec[last], store.componentSize);
+                        std::vector<std::byte>* componentVec = static_cast<std::vector<std::byte>*>(store.data);
+                        std::memcpy(componentVec->data() + index * store.componentSize, componentVec->data() + last * store.componentSize, store.componentSize);
                     }
                 }
 
                 entities.pop_back();
-                for (auto& [type, store] : components) {
-                    static_cast<std::vector<std::byte>*>(store.data)->pop_back();
+                for (auto& [type, store] : components)
+                {
+                    static_cast<std::vector<std::byte>*>(store.data)->resize(last * store.componentSize);
                 }
             }
 
@@ -144,7 +155,8 @@ namespace Weave
                 }
             }
 
-            ~Archetype() {
+            ~Archetype() 
+            {
                 for (auto& [type, store] : components) 
                 {
                     delete static_cast<std::vector<std::byte>*>(store.data);
@@ -171,6 +183,8 @@ namespace Weave
             template <typename... Components>
             void AddEntity(EntityID entity, Components... componentData) 
             {
+                mutex.lock();
+
                 entities.push_back(entity);
 
                 for (std::pair<const std::type_index, ComponentStore> componentPair : components)
@@ -182,15 +196,22 @@ namespace Weave
                 }
 
                 (GetComponentVector<Components>().emplace_back(std::move(componentData)), ...);
+
+                mutex.unlock();
             }
 
             void RemoveEntity(EntityID entity)
             {
+                mutex.lock();
+
                 auto it = std::find(entities.begin(), entities.end(), entity);
-                if (it != entities.end()) {
+                if (it != entities.end())
+                {
                     size_t index = std::distance(entities.begin(), it);
                     RemoveEntityAt(index);
                 }
+
+                mutex.unlock();
             }
 
             template <typename... Components>
@@ -198,6 +219,16 @@ namespace Weave
             {
                 size_t index = GetEntityIndex(entity);
                 return std::tie(GetComponentVector<Components>()[index]...);
+            }
+
+            template <typename Component>
+            Component* GetComponent(EntityID entity)
+            {
+                size_t index = GetEntityIndex(entity);
+
+                if (!validTypes.contains(typeid(Component))) return nullptr;
+
+                return &GetComponentVector<Component>()[index];
             }
 
             void* GetComponent(EntityID entity, std::type_index typeIndex)

@@ -64,6 +64,11 @@ namespace Weave
                 return *this / this->GetMagnitude();
             }
 
+            Vector2<T> GetPerpendicularVector()
+            {
+                return Vector2<T>(y, -x);
+            }
+
             template<Numeric ArgType>
             Vector2<T>& operator *=(ArgType operand)
             {
@@ -165,12 +170,6 @@ namespace Weave
             static float Dot(Vector2<T> vectorA, Vector2<T> vectorB)
             {
                 return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
-            }
-
-            template<Numeric T>
-            static Vector2<T> MidPoint(Vector2<T> vectorA, Vector2<T> vectorB)
-            {
-                return (vectorA + vectorB) / 2.0f;
             }
 		};
 
