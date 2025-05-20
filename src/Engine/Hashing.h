@@ -1,3 +1,4 @@
+#pragma once
 #include <tuple>
 #include <vector>
 #include "Mathematics.h"
@@ -22,8 +23,10 @@ namespace Weave
         template <class T>
         inline void hash_combine(std::size_t& seed, T const& v)
         {
-            // Just a brief explanation here: 0x9e3779b9 is a magic constant from the golden ratio that makes for much more uniform hash dispersion. The bit shifts are another 
-            // quick way of accomplishing the same goal.
+            /*
+                Just a brief explanation here : 0x9e3779b9 is a magic constant from the golden ratio that makes for much more uniform hash dispersion.The bit shifts are another
+                quick way of accomplishing the same goal. 
+            */
 
             seed ^= Hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         }

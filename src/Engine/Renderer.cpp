@@ -1,5 +1,5 @@
+#pragma once
 #include "Renderer.h"
-#include "Physics.h"
 
 void Weave::Graphics::Renderer::RenderSprites(ECS::World& world)
 {
@@ -21,50 +21,31 @@ void Weave::Graphics::Renderer::RenderSprites(ECS::World& world)
 
 		window->draw(renderSprite);
 	}
-
-	for (auto [entity, transform, collision] : world.GetView<Weave::Transform, Weave::Physics::Colliding>())
-	{
-		sf::CircleShape circle(5.0f);
-
-		circle.setOrigin( { 5.0f, 5.0f } );
-		circle.setPosition(WorldToPixelPos(transform.position));
-		circle.setFillColor(sf::Color::Red);
-
-		switch (collision.collisions.begin()->second.state)
-		{
-		case Weave::Physics::CollisionState::Started:
-			std::cout << "[Entity " << entity << "] Collision started!\n";
-			circle.setFillColor(sf::Color::Red);
-			break;
-		case Weave::Physics::CollisionState::Continued:
-			circle.setFillColor(sf::Color::Yellow);
-			break;
-		case Weave::Physics::CollisionState::Ended:
-			std::cout << "[Entity " << entity << "] Collision ended!\n";
-			circle.setFillColor(sf::Color::Green);
-			break;
-		default:
-			break;
-		}
-
-		window->draw(circle);
-	}
 }
 
 void Weave::Graphics::Renderer::TargetCamera(Mathematics::Vector2<float> worldPos)
 {
-	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { 320.f, 240.f })); // 320x240 was the resolution of the original Sinistar. I should probably make this a variable.
-	camera.setCenter(WorldToPixelPos(worldPos));
-	window->setView(camera);
+	cameraPosition = worldPos;
+
+	SetRenderMode(RenderMode::World);
 }
 
 Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::ScreenToWorldPos(Weave::Mathematics::Vector2<float> screenPos)
 {
 	screenPos /= Weave::Mathematics::Vector2<unsigned>(window->getSize());
 	screenPos *= Weave::Mathematics::Vector2<float>(window->getView().getSize());
-	screenPos -= Weave::Mathematics::Vector2<float>(window->getView().getCenter() + (window->getView().getSize() / 2.0f));
+	screenPos += Weave::Mathematics::Vector2<float>(window->getView().getCenter() - (window->getView().getSize() / 2.0f));
 
 	return PixelToWorldPos(screenPos);
+}
+
+void Weave::Graphics::Renderer::SetRenderMode(RenderMode renderMode)
+{
+	sf::View camera(sf::FloatRect({ 0.f, 0.f }, { 320.f, 240.f })); // 320x240 was the resolution of the original Sinistar. I should probably make this a variable.
+	
+	if (renderMode == RenderMode::World) camera.setCenter(WorldToPixelPos(cameraPosition));
+	
+	window->setView(camera);
 }
 
 std::shared_ptr<sf::Texture> Weave::Graphics::Renderer::GetTexture(std::string textureName)
@@ -93,3 +74,8 @@ Weave::Mathematics::Vector2<float> Weave::Graphics::Renderer::PixelToWorldPos(We
 Weave::Graphics::Renderer::Renderer(sf::RenderWindow* _window, std::string _rootDirectory) : window(_window), rootDirectory(_rootDirectory) { }
 
 Weave::Graphics::Renderer::~Renderer() { }
+
+void Weave::Graphics::Renderer::Draw(const sf::Drawable& drawable)
+{
+	window->draw(drawable);
+}

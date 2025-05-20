@@ -3,11 +3,8 @@
 
 namespace Weave
 {
-	static class Time
+	namespace Time
 	{
-	private:
-		static double deltaTime;
-
-	public:
-	};
+		extern double DeltaTime;
+	}
 }

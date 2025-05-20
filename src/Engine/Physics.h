@@ -5,6 +5,7 @@
 #include "Collisions.h"
 #include "Quadtree.h"
 #include "ThreadPool.h"
+#include "Time.h"
 #include <vector>
 #include <utility>
 #include <set>
@@ -14,21 +15,21 @@ namespace Weave
 {
 	namespace Physics
 	{
-        struct Collision;
+        struct EntityCollision;
 
         class PhysicsHandler
         {
         private:
-            float gravity;
-
             void UpdateCollisions(ECS::World& world);
             void CheckCollisions(ECS::World& world);
+            void ProcessPhysics(ECS::World& world);
+            void HandleCollisions(ECS::World& world);
 
         public:
-            PhysicsHandler(float gravity);
+            float gravity = 0.0f;
 
             void HandlePhysics(ECS::World& world);
-            std::vector<Collision> ProcessEntityCollisions(std::vector<std::pair<ECS::EntityID, Physics::Collider>> entities);
+            std::vector<EntityCollision> ProcessEntityCollisions(std::vector<std::pair<ECS::EntityID, Physics::Collider>> entities);
         };
 
         enum CollisionState
@@ -38,31 +39,32 @@ namespace Weave
             Ended
         };
 
-        struct CollisionData
+        struct CollisionData : Collision
         {
             Collider otherCollider;
-            Mathematics::Vector2<float> normal;
             CollisionState state;
         };
 
-        struct Collision
+        struct EntityCollision : CollisionData
         {
             ECS::EntityID lhs;
             ECS::EntityID rhs;
-
-            CollisionData data;
         };
 
         struct PhysicsMaterial
         {
-            float friction;
-            float bounciness;
-            float drag;
+            float friction = 0.0f;
+            float bounciness = 0.0f;
+            float drag = 0.0f;
         };
 
 		struct Rigidbody
 		{
 			Mathematics::Vector2<float> velocity;
+            Mathematics::Vector2<float> acceleration;
+
+            float mass = 0.0f;
+
             Collider collider;
             PhysicsMaterial material;
 		};

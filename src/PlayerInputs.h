@@ -3,14 +3,34 @@
 #include "Engine/Engine.h"
 #include "Engine/Events.h"
 #include "Engine/ECS.h"
+#include "Engine/Transform.h"
+#include "Player.h"
+#include "ShipMovement.h"
+#include "Blasters.h"
 
-class PlayerInputs
+namespace Sinistar
 {
-private:
-	Weave::Engine& engine;
+	class PlayerInputs
+	{
+	private:
+		Weave::Engine& engine;
 
-	void HandleMouseMoved(Weave::Mathematics::Vector2<float> newMousePos);
+		void HandleMouseMoved(Weave::Mathematics::Vector2<float> newMousePos);
 
-public:
-	PlayerInputs(Weave::Engine& engine);
-};
+		void HandleRightClickStarted();
+		void HandleRightClickEnded();
+
+		void HandleLeftClickStarted();
+		void HandleLeftClickEnded();
+
+		Weave::Mathematics::Vector2<float> targetPosition;
+
+		void UpdatePlayerMovement(Weave::ECS::World& world);
+		void UpdatePlayerRotation(Weave::ECS::World& world);
+
+		void UpdateBlasterTargetting(Weave::ECS::World& world);
+
+	public:
+		PlayerInputs(Weave::Engine& engine);
+	};
+}

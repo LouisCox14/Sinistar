@@ -17,7 +17,7 @@ file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/
 target_sources(Sinistar PRIVATE ${MY_SOURCES})
 target_include_directories(Sinistar PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-target_link_libraries(Sinistar PRIVATE SFML::Graphics)
+target_link_libraries(Sinistar PRIVATE SFML::Graphics SFML::Audio)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Sinistar PROPERTY CXX_STANDARD 20)

@@ -19,6 +19,7 @@ void Weave::ECS::World::DeleteEntity(EntityID entity)
 		pair.second.get()->RemoveEntity(entity);
 	}
 
+	entityToArchetype.erase(entity);
 	availableEntityIDs.insert(entity);
 }
 

@@ -11,7 +11,8 @@ namespace Weave
 {
 	namespace Utilities
 	{
-        class ThreadPool {
+        class ThreadPool 
+        {
         private:
             std::vector<std::thread> workers;
             std::queue<std::function<void()>> tasks;

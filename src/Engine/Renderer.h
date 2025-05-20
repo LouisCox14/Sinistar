@@ -12,6 +12,12 @@ namespace Weave
 	{
 		using TextureID = std::size_t;
 
+		enum RenderMode
+		{
+			World,
+			UI
+		};
+
 		class Renderer
 		{
 		private:
@@ -26,9 +32,13 @@ namespace Weave
 
 			const std::uint16_t pixelsPerUnit = 25;
 
+			Mathematics::Vector2<float> cameraPosition;
+
 		public:
 			Renderer(sf::RenderWindow* window, std::string rootDirectory);
 			~Renderer();
+
+			void Draw(const sf::Drawable& drawable);
 
 			std::shared_ptr<sf::Texture> GetTexture(std::string textureName);
 
@@ -36,6 +46,8 @@ namespace Weave
 			void TargetCamera(Mathematics::Vector2<float> worldPos);
 
 			Mathematics::Vector2<float> ScreenToWorldPos(Mathematics::Vector2<float> screenPos);
+
+			void SetRenderMode(RenderMode renderMode);
 		};
 
         struct Sprite
@@ -60,6 +72,7 @@ namespace Weave
 			}
 
 			SpriteSheet(std::shared_ptr<sf::Texture> _texture, Mathematics::Vector2<uint16_t> _cellSize) : texture(_texture), cellSize(_cellSize) { }
+			SpriteSheet() { }
 		};
 	}
 }

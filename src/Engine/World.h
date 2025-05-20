@@ -37,9 +37,15 @@ namespace Weave
 
                 void AdvanceToNextValidArchetype()
                 {
-                    while (currentArchetypeIndex < archetypeViews->size() && currentIterator == (*archetypeViews)[currentArchetypeIndex].end())
+                    while (currentArchetypeIndex < archetypeViews->size())
                     {
+                        if (currentIterator != (*archetypeViews)[currentArchetypeIndex].end())
+                        {
+                            break;
+                        }
+
                         ++currentArchetypeIndex;
+
                         if (currentArchetypeIndex < archetypeViews->size())
                         {
                             currentIterator = (*archetypeViews)[currentArchetypeIndex].begin();
@@ -309,6 +315,7 @@ namespace Weave
                 for (Archetype* archetype : matchingArchetypes)
                 {
                     std::vector<EntityID>& entityVector = archetype->GetEntityVector();
+                    if (entityVector.size() == 0) continue;
 
                     auto componentVectors = std::make_tuple(
                         static_cast<std::vector<QueryComponents>*>(&archetype->GetComponentVector<QueryComponents>())...

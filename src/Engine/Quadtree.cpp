@@ -1,3 +1,4 @@
+#pragma once
 #include "Quadtree.h"
 
 void Weave::QuadTree::PushObject(ObjectID object)

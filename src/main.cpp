@@ -1,62 +1,51 @@
+#pragma once
 #include "Engine/Engine.h"
 #include "PlayerInputs.h"
 #include "Player.h"
+#include "Meteor.h"
+#include "Engine/Random.h"
 #include "Engine/Physics.h"
+#include "ShipMovement.h"
+#include "Engine/EntityTimeout.h"
+#include "Camera.h"
+#include "Minimap.h"
 #include <iostream>
-#include <random>
 
 int main()
 {
 	Weave::Engine engine = Weave::Engine("Sinistar");
 
-	std::shared_ptr<sf::Texture> sinistarTexture = engine.GetRenderer().GetTexture("spritesheet_sinistar.png");
-	Weave::Graphics::SpriteSheet sinistarSpritesheet(sinistarTexture, Weave::Mathematics::Vector2<uint16_t>(53, 53));
+	engine.GetWorld().GetSystemGroup(engine.lateUpdateGroup).Subscribe(&Weave::UpdateEntityTimeout);
 
-	std::shared_ptr<sf::Texture> playerTexture = engine.GetRenderer().GetTexture("spritesheet_player.png");
-	Weave::Graphics::SpriteSheet playerSpritesheet(playerTexture, Weave::Mathematics::Vector2<uint16_t>(11, 11));
+	Weave::Physics::PhysicsHandler physicsHandler;
 
-	Weave::Physics::PhysicsHandler physicsHandler(0);
-	engine.GetWorld().GetSystemGroup(engine.updateGroup).Subscribe(physicsHandler, &Weave::Physics::PhysicsHandler::HandlePhysics);
+	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(physicsHandler, &Weave::Physics::PhysicsHandler::HandlePhysics);
+	engine.GetWorld().GetSystemGroup(engine.fixedUpdateGroup).Subscribe(&Sinistar::ApplyShipAcceleration);
 
-	Weave::Physics::Rigidbody playerRigidbody;
-	playerRigidbody.collider.shape = Weave::Shapes::Circle(Weave::Mathematics::Vector2(0, 0), 0.25f);
-	playerRigidbody.collider.layers = Weave::Physics::CollisionLayer::Layer1;
-	playerRigidbody.collider.layerMask = Weave::Physics::CollisionLayer::Layer2;
+	engine.GetWorld().GetSystemGroup(engine.lateUpdateGroup).Subscribe(&Sinistar::UpdateBlasters);
+	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(&Sinistar::UpdateProjectiles);
 
-	Weave::ECS::EntityID player = engine.GetWorld().CreateEntity();
-	engine.GetWorld().AddComponents<PlayerTag, Weave::Transform, Weave::Graphics::Sprite, Weave::Physics::Rigidbody>(
-		player,
-		{ },
-		{ },
-		playerSpritesheet.GetSprite(1),
-		playerRigidbody
-	);
+	Sinistar::MeteorManager meteorManager(engine);
+	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(meteorManager, &Sinistar::MeteorManager::ResolveMeteorsHit);
 
-	Weave::Physics::Rigidbody testRigidbody;
-	testRigidbody.collider.shape = Weave::Shapes::Circle(Weave::Mathematics::Vector2(0, 0), 0.25f);
-	testRigidbody.collider.layers = Weave::Physics::CollisionLayer::Layer2;
-	testRigidbody.collider.layerMask = Weave::Physics::CollisionLayer::Layer1;
+	Sinistar::SinibombManager sinibombManager(engine);
+	engine.GetWorld().GetSystemGroup(engine.updateGroup).Subscribe(sinibombManager, &Sinistar::SinibombManager::UpdateSinicrystalHolders);
+	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(sinibombManager, &Sinistar::SinibombManager::UpdateSinicrystals);
 
-	Weave::Transform testTransform;
-	testTransform.scale = { 0.25f, 0.25f };
+	Sinistar::CameraManager cameraManager(engine);
+	engine.GetWorld().GetSystemGroup(engine.lateUpdateGroup).Subscribe(cameraManager, &Sinistar::CameraManager::UpdateCamera);
 
-	std::default_random_engine gen;
-	std::uniform_real_distribution<float> distribution(-10, 10);
+	Sinistar::MinimapManager minimapManager(engine);
+	engine.GetWorld().GetSystemGroup(engine.uiRenderGroup).Subscribe(minimapManager, &Sinistar::MinimapManager::DrawMinimap);
 
-	for (int i = 0; i < 1000; i++)
+	Weave::ECS::EntityID player = Sinistar::CreatePlayer(engine);
+
+	for (int i = 0; i < 300; i++)
 	{
-		testTransform.position = { distribution(gen), distribution(gen) };
-
-		Weave::ECS::EntityID testEntity = engine.GetWorld().CreateEntity();
-		engine.GetWorld().AddComponents<Weave::Transform, Weave::Graphics::Sprite, Weave::Physics::Rigidbody>(
-			testEntity,
-			testTransform,
-			sinistarSpritesheet.GetSprite(26),
-			testRigidbody
-		);
+		meteorManager.CreateMeteor(engine, { Weave::Random::GenerateRandomInBounds(-100.0f, 100.0f), Weave::Random::GenerateRandomInBounds(-100.0f, 100.0f) });
 	}
 
-	PlayerInputs playerInputs(engine);
+	Sinistar::PlayerInputs playerInputs(engine);
 
 	engine.Run();
 

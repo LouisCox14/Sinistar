@@ -36,35 +36,45 @@ namespace Weave
             Layer20 = 1 << 20,
             Layer21 = 1 << 21,
             Layer22 = 1 << 22,
-            Layer23 = 1 << 23,
+            Layer23 = 1 << 23
         };
+
+        using LayerMask = std::bitset<24>;
 
 		struct Collider
 		{
 			std::variant<Shapes::Rectangle, Shapes::Circle, Shapes::Line> shape;
-            std::bitset<24> layerMask = CollisionLayer::All;
-            std::bitset<24> layers = CollisionLayer::Default;
+            LayerMask layerMask = CollisionLayer::All;
+            LayerMask layers = CollisionLayer::Default;
 		};
 
-        bool Collides(Collider lhs, Collider rhs);
+        struct Collision
+        {
+            Mathematics::Vector2<float> normal;
+            float depth;
+        };
 
-        bool Collides(Shapes::Rectangle lhs, Shapes::Rectangle rhs);
-        bool Collides(Shapes::Rectangle lhs, Shapes::Circle rhs);
-        bool Collides(Shapes::Rectangle lhs, Shapes::Line rhs);
-        bool Collides(Shapes::Circle lhs, Shapes::Circle rhs);
-        bool Collides(Shapes::Circle lhs, Shapes::Line rhs);
-        bool Collides(Shapes::Line lhs, Shapes::Line rhs);
+        // TODO: Make all collision checks take const references as arguments.
+
+        std::optional<Collision> Collides(Collider lhs, Collider rhs);
+
+        std::optional<Collision> Collides(Shapes::Rectangle lhs, Shapes::Rectangle rhs);
+        std::optional<Collision> Collides(Shapes::Rectangle lhs, Shapes::Circle rhs);
+        std::optional<Collision> Collides(Shapes::Rectangle lhs, Shapes::Line rhs);
+        std::optional<Collision> Collides(Shapes::Circle lhs, Shapes::Circle rhs);
+        std::optional<Collision> Collides(Shapes::Circle lhs, Shapes::Line rhs);
+        std::optional<Collision> Collides(Shapes::Line lhs, Shapes::Line rhs);
 
         // Overriding for point checks.
 
-        bool Collides(Mathematics::Vector2<float> point, Shapes::Rectangle collider);
-        bool Collides(Mathematics::Vector2<float> point, Shapes::Circle collider);
+        std::optional<Collision> Collides(Mathematics::Vector2<float> point, Shapes::Rectangle collider);
+        std::optional<Collision> Collides(Mathematics::Vector2<float> point, Shapes::Circle collider);
 
         // Overriding for alternate parameter orders.
 
-        bool Collides(Shapes::Circle lhs, Shapes::Rectangle rhs);
-        bool Collides(Shapes::Line lhs, Shapes::Rectangle rhs);
-        bool Collides(Shapes::Line lhs, Shapes::Circle rhs);
+        std::optional<Collision> Collides(Shapes::Circle lhs, Shapes::Rectangle rhs);
+        std::optional<Collision> Collides(Shapes::Line lhs, Shapes::Rectangle rhs);
+        std::optional<Collision> Collides(Shapes::Line lhs, Shapes::Circle rhs);
 
         Collider TranslateCollider(Collider collider, Mathematics::Vector2<float> offset);
 

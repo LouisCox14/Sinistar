@@ -117,9 +117,12 @@ namespace Weave
 
 				for (std::pair<std::tuple<size_t, size_t>, std::function<void(ArgTypes...)>> callback : callbackMap)
 				{
-					// There is absolutely no checking here to make sure that the function I'm trying to call still exists, or that it's caller does. I'm not entirely sure
-					// how I could do that without dealing with overhead from exceptions, so for now I'll just leave it as is, and classes using events will have to 
-					// unsubscribe in their destructor.
+					/*
+						There is absolutely no checking here to make sure that the function I'm trying to call still exists, or that it's caller does.I'm not entirely sure
+						how I could do that without dealing with overhead from exceptions, so for now I'll just leave it as is, and classes using events will have to 
+						unsubscribe in their destructor. 
+					*/
+
 					callback.second(args...);
 				}
 
