@@ -10,6 +10,7 @@
 #include <utility>
 #include <set>
 #include <queue>
+#include <map>
 
 namespace Weave
 {

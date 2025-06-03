@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/ECS.h"
+#include "ECS.h"
 
 namespace Sinistar
 {

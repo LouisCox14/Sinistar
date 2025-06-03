@@ -11,6 +11,9 @@
 
 namespace Weave
 {
+	using SystemGroupID = std::size_t;
+	using SystemGroup = Utilities::Event<ECS::World&>;
+
 	class Engine
 	{
 	private:
@@ -22,20 +25,32 @@ namespace Weave
 
 		const float fixedUpdateInterval = 0.02f;
 
+		std::vector<SystemGroup> systemGroups;
+
+		SystemGroupID nextSystemGroupID = 0;
+		std::set<SystemGroupID> availableSystemGroupIDs;
+
 	public:
 		Engine(std::string windowName);
 		~Engine();
 
-		const ECS::SystemGroupID updateGroup;
-		const ECS::SystemGroupID lateUpdateGroup;
-		const ECS::SystemGroupID fixedUpdateGroup;
-		const ECS::SystemGroupID lateFixedUpdateGroup;
-		const ECS::SystemGroupID worldRenderGroup;
-		const ECS::SystemGroupID uiRenderGroup;
+		const SystemGroupID updateGroup;
+		const SystemGroupID lateUpdateGroup;
+		const SystemGroupID fixedUpdateGroup;
+		const SystemGroupID lateFixedUpdateGroup;
+		const SystemGroupID worldRenderGroup;
+		const SystemGroupID uiRenderGroup;
 
 		ECS::World& GetWorld();
 		Graphics::Renderer& GetRenderer();
 		Input::InputHandler& GetInputHandler();
+
+		SystemGroupID CreateSystemGroup();
+		void RetireSystemGroup(SystemGroupID systemGroup);
+		bool IsSystemGroupRegistered(SystemGroupID systemGroup);
+
+		SystemGroup& GetSystemGroup(SystemGroupID groupID);
+		void CallSystemGroup(SystemGroupID groupID);
 
 		void Run();
 	};

@@ -51,7 +51,7 @@ void Sinistar::SinibombManager::UpdateSinicrystals(Weave::ECS::World& world)
 	{
 		for (std::map<Weave::ECS::EntityID, Weave::Physics::CollisionData>::iterator collision = colliding.collisions.begin(); collision != colliding.collisions.end(); collision++)
 		{
-			SinicrystalHolder* crystalHolder = world.GetComponent<SinicrystalHolder>(collision->first);
+			SinicrystalHolder* crystalHolder = world.TryGetComponent<SinicrystalHolder>(collision->first);
 
 			if (!crystalHolder) return;
 

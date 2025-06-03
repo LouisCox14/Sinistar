@@ -46,7 +46,7 @@ void Sinistar::UpdateProjectiles(Weave::ECS::World& world)
 
 	for (Weave::ECS::EntityID entity : entitiesHit)
 	{
-		Health* entityHealth = world.GetComponent<Health>(entity);
+		Health* entityHealth = world.TryGetComponent<Health>(entity);
 
 		if (!entityHealth) continue;
 

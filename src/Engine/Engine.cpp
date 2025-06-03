@@ -1,13 +1,13 @@
 #pragma once
 #include "Engine.h"
 
-Weave::Engine::Engine(std::string windowName) : updateGroup(world.CreateSystemGroup()), lateUpdateGroup(world.CreateSystemGroup()), fixedUpdateGroup(world.CreateSystemGroup()), lateFixedUpdateGroup(world.CreateSystemGroup()), worldRenderGroup(world.CreateSystemGroup()), uiRenderGroup(world.CreateSystemGroup()), renderer(Graphics::Renderer(&window, "Assets/"))
+Weave::Engine::Engine(std::string windowName) : updateGroup(CreateSystemGroup()), lateUpdateGroup(CreateSystemGroup()), fixedUpdateGroup(CreateSystemGroup()), lateFixedUpdateGroup(CreateSystemGroup()), worldRenderGroup(CreateSystemGroup()), uiRenderGroup(CreateSystemGroup()), renderer(Graphics::Renderer(&window, "Assets/"))
 {
 	window.create(sf::VideoMode({ 1360, 960 }), windowName, sf::Style::Close, sf::State::Windowed);
     renderer.TargetCamera({0, 0});
 
-    world.GetSystemGroup(worldRenderGroup).Subscribe(renderer, &Weave::Graphics::Renderer::RenderSprites);
-    world.GetSystemGroup(lateUpdateGroup).Subscribe(&Weave::Graphics::UpdateAnimations);
+    GetSystemGroup(worldRenderGroup).Subscribe(renderer, &Weave::Graphics::Renderer::RenderSprites);
+    GetSystemGroup(lateUpdateGroup).Subscribe(&Weave::Graphics::UpdateAnimations);
 }
 
 Weave::Engine::~Engine() { }
@@ -25,6 +25,45 @@ Weave::Graphics::Renderer& Weave::Engine::GetRenderer()
 Weave::Input::InputHandler& Weave::Engine::GetInputHandler()
 {
     return inputHandler;
+}
+
+Weave::SystemGroupID Weave::Engine::CreateSystemGroup()
+{
+    if (!availableSystemGroupIDs.empty())
+        return availableSystemGroupIDs.extract(availableSystemGroupIDs.begin()).value();
+
+    systemGroups.resize(nextSystemGroupID + 1);
+    return nextSystemGroupID++;
+}
+
+void Weave::Engine::RetireSystemGroup(Weave::SystemGroupID systemGroup)
+{
+    if (!IsSystemGroupRegistered(systemGroup)) return;
+
+    systemGroups[systemGroup].clear();
+    availableSystemGroupIDs.insert(systemGroup);
+}
+
+bool Weave::Engine::IsSystemGroupRegistered(Weave::SystemGroupID systemGroup)
+{
+    if (systemGroup > nextSystemGroupID) return false;
+    if (availableSystemGroupIDs.find(systemGroup) != availableSystemGroupIDs.end()) return false;
+
+    return true;
+}
+
+Weave::SystemGroup& Weave::Engine::GetSystemGroup(SystemGroupID groupID)
+{
+    if (!IsSystemGroupRegistered(groupID)) throw std::logic_error("System is not registered.");
+
+    return systemGroups[groupID];
+}
+
+void Weave::Engine::CallSystemGroup(Weave::SystemGroupID groupID)
+{
+    if (!IsSystemGroupRegistered(groupID)) return;
+
+    systemGroups[groupID](world);
 }
 
 void Weave::Engine::Run()
@@ -55,20 +94,20 @@ void Weave::Engine::Run()
             inputHandler.HandleEvent(windowEvent.value());
         }
 
-        world.CallSystemGroup(updateGroup);
-        world.CallSystemGroup(lateUpdateGroup);
+        CallSystemGroup(updateGroup);
+        CallSystemGroup(lateUpdateGroup);
 
-        world.CallSystemGroup(worldRenderGroup);
+        CallSystemGroup(worldRenderGroup);
         renderer.SetRenderMode(Graphics::RenderMode::UI);
-        world.CallSystemGroup(uiRenderGroup);
+        CallSystemGroup(uiRenderGroup);
         renderer.SetRenderMode(Graphics::RenderMode::World);
 
         Time::DeltaTime = fixedUpdateInterval;
 
         while (timeSinceFixedUpdate > fixedUpdateInterval)
         {
-            world.CallSystemGroup(fixedUpdateGroup);
-            world.CallSystemGroup(lateFixedUpdateGroup);
+            CallSystemGroup(fixedUpdateGroup);
+            CallSystemGroup(lateFixedUpdateGroup);
 
             timeSinceFixedUpdate -= fixedUpdateInterval;
         }

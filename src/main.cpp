@@ -15,28 +15,28 @@ int main()
 {
 	Weave::Engine engine = Weave::Engine("Sinistar");
 
-	engine.GetWorld().GetSystemGroup(engine.lateUpdateGroup).Subscribe(&Weave::UpdateEntityTimeout);
+	engine.GetSystemGroup(engine.lateUpdateGroup).Subscribe(&Weave::UpdateEntityTimeout);
 
 	Weave::Physics::PhysicsHandler physicsHandler;
 
-	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(physicsHandler, &Weave::Physics::PhysicsHandler::HandlePhysics);
-	engine.GetWorld().GetSystemGroup(engine.fixedUpdateGroup).Subscribe(&Sinistar::ApplyShipAcceleration);
+	engine.GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(physicsHandler, &Weave::Physics::PhysicsHandler::HandlePhysics);
+	engine.GetSystemGroup(engine.fixedUpdateGroup).Subscribe(&Sinistar::ApplyShipAcceleration);
 
-	engine.GetWorld().GetSystemGroup(engine.lateUpdateGroup).Subscribe(&Sinistar::UpdateBlasters);
-	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(&Sinistar::UpdateProjectiles);
+	engine.GetSystemGroup(engine.lateUpdateGroup).Subscribe(&Sinistar::UpdateBlasters);
+	engine.GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(&Sinistar::UpdateProjectiles);
 
 	Sinistar::MeteorManager meteorManager(engine);
-	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(meteorManager, &Sinistar::MeteorManager::ResolveMeteorsHit);
+	engine.GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(meteorManager, &Sinistar::MeteorManager::ResolveMeteorsHit);
 
 	Sinistar::SinibombManager sinibombManager(engine);
-	engine.GetWorld().GetSystemGroup(engine.updateGroup).Subscribe(sinibombManager, &Sinistar::SinibombManager::UpdateSinicrystalHolders);
-	engine.GetWorld().GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(sinibombManager, &Sinistar::SinibombManager::UpdateSinicrystals);
+	engine.GetSystemGroup(engine.updateGroup).Subscribe(sinibombManager, &Sinistar::SinibombManager::UpdateSinicrystalHolders);
+	engine.GetSystemGroup(engine.lateFixedUpdateGroup).Subscribe(sinibombManager, &Sinistar::SinibombManager::UpdateSinicrystals);
 
 	Sinistar::CameraManager cameraManager(engine);
-	engine.GetWorld().GetSystemGroup(engine.lateUpdateGroup).Subscribe(cameraManager, &Sinistar::CameraManager::UpdateCamera);
+	engine.GetSystemGroup(engine.lateUpdateGroup).Subscribe(cameraManager, &Sinistar::CameraManager::UpdateCamera);
 
 	Sinistar::MinimapManager minimapManager(engine);
-	engine.GetWorld().GetSystemGroup(engine.uiRenderGroup).Subscribe(minimapManager, &Sinistar::MinimapManager::DrawMinimap);
+	engine.GetSystemGroup(engine.uiRenderGroup).Subscribe(minimapManager, &Sinistar::MinimapManager::DrawMinimap);
 
 	Weave::ECS::EntityID player = Sinistar::CreatePlayer(engine);
 

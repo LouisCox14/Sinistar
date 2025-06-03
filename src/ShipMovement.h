@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/Mathematics.h"
-#include "Engine/ECS.h"
+#include "ECS.h"
 #include "Engine/Physics.h"
 
 namespace Sinistar

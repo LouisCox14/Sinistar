@@ -2,7 +2,6 @@
 #include "Engine/Mathematics.h"
 #include "Engine/Engine.h"
 #include "Engine/Events.h"
-#include "Engine/ECS.h"
 #include "Engine/Transform.h"
 #include "Player.h"
 #include "ShipMovement.h"

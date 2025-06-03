@@ -16,7 +16,7 @@ void Sinistar::MeteorManager::ResolveMeteorsHit(Weave::ECS::World& world)
 
 	for (auto [entity, mTag, hTag] : world.GetView<MeteorTag, KillTag>())
 	{
-		SinicrystalHolder* holder = world.GetComponent<SinicrystalHolder>(entity);
+		SinicrystalHolder* holder = world.TryGetComponent<SinicrystalHolder>(entity);
 
 		if (holder && holder->sinicrystals > 0) continue;
 
@@ -33,7 +33,7 @@ void Sinistar::MeteorManager::ResolveMeteorsHit(Weave::ECS::World& world)
 	for (Weave::ECS::EntityID entity : deletionQueue)
 	{
 		Weave::Transform particleTransform;
-		particleTransform.position = world.GetComponent<Weave::Transform>(entity)->position;
+		particleTransform.position = world.TryGetComponent<Weave::Transform>(entity)->position;
 
 		for (int i = 0; i < Weave::Random::GenerateRandomInBounds(1, 4); i++)
 		{

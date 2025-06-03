@@ -74,8 +74,13 @@ void Weave::Physics::PhysicsHandler::CheckCollisions(ECS::World& world)
 			if (processedCollisions.contains({ collision.lhs, collision.rhs })) continue;
 			processedCollisions.insert({ collision.lhs, collision.rhs });
 
-			if (!world.HasComponent<Colliding>(collision.lhs)) world.AddComponent<Colliding>(collision.lhs);
-			Colliding* component = world.GetComponent<Colliding>(collision.lhs);
+			Colliding* component = world.TryGetComponent<Colliding>(collision.lhs);
+
+			if (!component)
+			{
+				world.AddComponent<Colliding>(collision.lhs);
+				component = world.TryGetComponent<Colliding>(collision.lhs);
+			}
 
 			std::map<ECS::EntityID, CollisionData>::iterator iter = component->collisions.find(collision.rhs);
 
@@ -120,8 +125,8 @@ void Weave::Physics::PhysicsHandler::HandleCollisions(ECS::World& world)
 			if (entity >= otherEntity) continue; // Ensures each pair is processed only once.
 			if (collisionData.state == CollisionState::Ended) continue; // Ensures ending collisions are not processed.
 
-			Transform* otherTransform = world.GetComponent<Transform>(otherEntity);
-			Rigidbody* otherRigidbody = world.GetComponent<Rigidbody>(otherEntity);
+			Transform* otherTransform = world.TryGetComponent<Transform>(otherEntity);
+			Rigidbody* otherRigidbody = world.TryGetComponent<Rigidbody>(otherEntity);
 
 			if (!otherTransform || !otherRigidbody) continue; // Other is missing either a transform or a rigidbody, no response required.
 
