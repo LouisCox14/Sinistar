@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Engine.h"
+#include "GameEngine/GameEngine.h"
 
 namespace Sinistar
 {
@@ -15,7 +15,7 @@ namespace Sinistar
 		sf::Sprite* minimapBorder;
 
 	public:
-		MinimapManager(Weave::Engine& engine);
+		MinimapManager(Weave::GameEngine& engine);
 		~MinimapManager();
 
 		void DrawMinimap(Weave::ECS::World& world);

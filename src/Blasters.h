@@ -1,7 +1,7 @@
 #pragma once
 #include "Projectile.h"
-#include "Engine/Engine.h"
-#include "Engine/Time.h"
+#include "GameEngine/GameEngine.h"
+#include "GameEngine/Time.h"
 
 namespace Sinistar
 {

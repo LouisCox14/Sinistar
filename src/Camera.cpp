@@ -1,7 +1,7 @@
 #pragma once
 #include "Camera.h"
 
-Sinistar::CameraManager::CameraManager(Weave::Engine& engine)
+Sinistar::CameraManager::CameraManager(Weave::GameEngine& engine)
 {
 	renderer = &engine.GetRenderer();
 }

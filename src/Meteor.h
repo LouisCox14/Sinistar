@@ -1,8 +1,8 @@
 #pragma once
-#include "Engine/Engine.h"
-#include "Engine/Physics.h"
-#include "Engine/Random.h"
-#include "Engine/EntityTimeout.h"
+#include "GameEngine/GameEngine.h"
+#include "GameEngine/Physics.h"
+#include "GameEngine/Random.h"
+#include "GameEngine/EntityTimeout.h"
 #include "CollisionLayers.h"
 #include "Health.h"
 #include "Sinibomb.h"
@@ -19,9 +19,9 @@ namespace Sinistar
 		Weave::Graphics::SpriteSheet particleSpritesheet;
 
 	public:
-		MeteorManager(Weave::Engine& engine);
+		MeteorManager(Weave::GameEngine& engine);
 
 		void ResolveMeteorsHit(Weave::ECS::World& world);
-		Weave::ECS::EntityID CreateMeteor(Weave::Engine& engine, Weave::Mathematics::Vector2<float> startPosition);
+		Weave::ECS::EntityID CreateMeteor(Weave::GameEngine& engine, Weave::Mathematics::Vector2<float> startPosition);
 	};
 }

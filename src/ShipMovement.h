@@ -1,7 +1,7 @@
 #pragma once
-#include "Engine/Mathematics.h"
+#include "GameEngine/Mathematics.h"
 #include "ECS.h"
-#include "Engine/Physics.h"
+#include "GameEngine/Physics.h"
 
 namespace Sinistar
 {
@@ -11,5 +11,5 @@ namespace Sinistar
 		float speed = 0.0f;
 	};
 
-	void ApplyShipAcceleration(Weave::ECS::World& world);
+	void ApplyShipAcceleration(Weave::ECS::EntityID entity, ShipMovement& shipMovement, Weave::Physics::Rigidbody& rigidbody);
 }

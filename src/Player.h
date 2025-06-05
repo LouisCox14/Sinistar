@@ -1,6 +1,6 @@
 #pragma once
-#include "Engine/Engine.h"
-#include "Engine/Physics.h"
+#include "GameEngine/GameEngine.h"
+#include "GameEngine/Physics.h"
 #include "ShipMovement.h"
 #include "CollisionLayers.h"
 #include "Blasters.h"
@@ -11,5 +11,5 @@ namespace Sinistar
 {
 	struct PlayerTag { };
 
-	Weave::ECS::EntityID CreatePlayer(Weave::Engine& engine);
+	Weave::ECS::EntityID CreatePlayer(Weave::GameEngine& engine);
 }

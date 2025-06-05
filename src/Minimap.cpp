@@ -1,7 +1,7 @@
 #pragma once
 #include "Minimap.h"
 
-Sinistar::MinimapManager::MinimapManager(Weave::Engine& engine)
+Sinistar::MinimapManager::MinimapManager(Weave::GameEngine& engine)
 {
 	renderer = &engine.GetRenderer();
 

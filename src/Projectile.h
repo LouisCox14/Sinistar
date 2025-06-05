@@ -1,8 +1,8 @@
 #pragma once
-#include "Engine/Engine.h"
-#include "Engine/Physics.h"
+#include "GameEngine/GameEngine.h"
+#include "GameEngine/Physics.h"
 #include "CollisionLayers.h"
-#include "Engine/EntityTimeout.h"
+#include "GameEngine/EntityTimeout.h"
 #include "Health.h"
 
 namespace Sinistar

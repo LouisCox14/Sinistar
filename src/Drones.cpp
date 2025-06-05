@@ -1,7 +1,7 @@
 #pragma once
 #include "Drones.h"
 
-Sinistar::DroneManager::DroneManager(Weave::Engine& engine)
+Sinistar::DroneManager::DroneManager(Weave::GameEngine& engine)
 {
 	std::shared_ptr<sf::Texture> workerTexture = engine.GetRenderer().GetTexture("spritesheet_worker_10x10.png");
 	workerSpritesheet = Weave::Graphics::SpriteSheet(workerTexture, Weave::Mathematics::Vector2<uint16_t>(2, 2));

@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Engine.h"
+#include "GameEngine/GameEngine.h"
 #include "CollisionLayers.h"
 
 namespace Sinistar
@@ -15,6 +15,6 @@ namespace Sinistar
 		Weave::Graphics::SpriteSheet warriorSpritesheet;
 
 	public:
-		DroneManager(Weave::Engine& engine);
+		DroneManager(Weave::GameEngine& engine);
 	};
 }

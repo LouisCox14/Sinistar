@@ -1,7 +1,7 @@
 #pragma once
 #include "Meteor.h"
 
-Sinistar::MeteorManager::MeteorManager(Weave::Engine& engine)
+Sinistar::MeteorManager::MeteorManager(Weave::GameEngine& engine)
 {
 	std::shared_ptr<sf::Texture> meteorTexture = engine.GetRenderer().GetTexture("spritesheet_meteors_30x30.png");
 	meteorSpritesheet = Weave::Graphics::SpriteSheet(meteorTexture, Weave::Mathematics::Vector2<uint16_t>(30, 30));
@@ -55,7 +55,7 @@ void Sinistar::MeteorManager::ResolveMeteorsHit(Weave::ECS::World& world)
 	}
 }
 
-Weave::ECS::EntityID Sinistar::MeteorManager::CreateMeteor(Weave::Engine& engine, Weave::Mathematics::Vector2<float> startPosition)
+Weave::ECS::EntityID Sinistar::MeteorManager::CreateMeteor(Weave::GameEngine& engine, Weave::Mathematics::Vector2<float> startPosition)
 {
 	Weave::Physics::Rigidbody meteorRigidbody;
 	meteorRigidbody.collider.shape = Weave::Shapes::Circle(Weave::Mathematics::Vector2(0, 0), 0.4f);

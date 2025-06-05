@@ -8,7 +8,7 @@ namespace Weave
     namespace Utilites
     {
         /*
-            This code is all to deal with hashing for types that C++ doesn't support out of the box like Vectors, Tuples, and any type from Weave Engine itself.
+            This code is all to deal with hashing for types that C++ doesn't support out of the box like Vectors, Tuples, and any type from Weave GameEngine itself.
         */
 
         template <typename TT>

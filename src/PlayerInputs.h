@@ -1,8 +1,8 @@
 #pragma once
-#include "Engine/Mathematics.h"
-#include "Engine/Engine.h"
-#include "Engine/Events.h"
-#include "Engine/Transform.h"
+#include "GameEngine/Mathematics.h"
+#include "GameEngine/GameEngine.h"
+#include "GameEngine/Events.h"
+#include "GameEngine/Transform.h"
 #include "Player.h"
 #include "ShipMovement.h"
 #include "Blasters.h"
@@ -12,7 +12,7 @@ namespace Sinistar
 	class PlayerInputs
 	{
 	private:
-		Weave::Engine& engine;
+		Weave::GameEngine& engine;
 
 		void HandleMouseMoved(Weave::Mathematics::Vector2<float> newMousePos);
 
@@ -29,7 +29,10 @@ namespace Sinistar
 
 		void UpdateBlasterTargetting(Weave::ECS::World& world);
 
+		Weave::ECS::SystemID moveSystem;
+		Weave::ECS::SystemID targetSystem;
+
 	public:
-		PlayerInputs(Weave::Engine& engine);
+		PlayerInputs(Weave::GameEngine& engine);
 	};
 }

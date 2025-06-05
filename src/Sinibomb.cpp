@@ -26,7 +26,7 @@ Weave::ECS::EntityID Sinistar::SinibombManager::CreateSinicrystal(Weave::ECS::Wo
 	return sinicrystal;
 }
 
-Sinistar::SinibombManager::SinibombManager(Weave::Engine& engine)
+Sinistar::SinibombManager::SinibombManager(Weave::GameEngine& engine)
 {
 	std::shared_ptr<sf::Texture> sinicrystalTexture = engine.GetRenderer().GetTexture("sinicrystal_2x2.png");
 	sinicrystalSpritesheet = Weave::Graphics::SpriteSheet(sinicrystalTexture, Weave::Mathematics::Vector2<uint16_t>(2, 2));

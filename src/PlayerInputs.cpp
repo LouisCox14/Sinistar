@@ -8,7 +8,7 @@ void Sinistar::PlayerInputs::HandleMouseMoved(Weave::Mathematics::Vector2<float>
 
 void Sinistar::PlayerInputs::HandleRightClickStarted()
 {
-	engine.GetSystemGroup(engine.updateGroup).Subscribe(*this, &PlayerInputs::UpdatePlayerMovement);
+	moveSystem = engine.RegisterSystem(engine.updateGroup, [this](Weave::ECS::World& world) { UpdatePlayerMovement(world); });
 }
 
 void Sinistar::PlayerInputs::HandleRightClickEnded()
@@ -18,12 +18,12 @@ void Sinistar::PlayerInputs::HandleRightClickEnded()
 		shipMovement.direction = { 0.0f, 0.0f };
 	}
 
-	engine.GetSystemGroup(engine.updateGroup).Unsubscribe(*this, &PlayerInputs::UpdatePlayerMovement);
+	engine.RetireSystem(moveSystem);
 }
 
 void Sinistar::PlayerInputs::HandleLeftClickStarted()
 {
-	engine.GetSystemGroup(engine.updateGroup).Subscribe(*this, &PlayerInputs::UpdateBlasterTargetting);
+	targetSystem = engine.RegisterSystem(engine.updateGroup, [this](Weave::ECS::World& world) { UpdateBlasterTargetting(world); });
 
 	for (auto [entity, blaster, tag] : engine.GetWorld().GetView<Sinistar::Blasters, PlayerTag>())
 	{
@@ -38,7 +38,7 @@ void Sinistar::PlayerInputs::HandleLeftClickEnded()
 		blaster.isFiring = false;
 	}
 
-	engine.GetSystemGroup(engine.updateGroup).Unsubscribe(*this, &PlayerInputs::UpdateBlasterTargetting);
+	engine.RetireSystem(targetSystem);
 }
 
 void Sinistar::PlayerInputs::UpdatePlayerMovement(Weave::ECS::World& world)
@@ -65,9 +65,9 @@ void Sinistar::PlayerInputs::UpdateBlasterTargetting(Weave::ECS::World& world)
 	}
 }
 
-Sinistar::PlayerInputs::PlayerInputs(Weave::Engine& _engine) : engine(_engine)
+Sinistar::PlayerInputs::PlayerInputs(Weave::GameEngine& _engine) : engine(_engine)
 {
-	engine.GetSystemGroup(engine.updateGroup).Subscribe(*this, &PlayerInputs::UpdatePlayerRotation);
+	engine.RegisterSystem(engine.updateGroup, [this](Weave::ECS::World& world) { UpdatePlayerRotation(world); });
 
 	engine.GetInputHandler().GetMouseMoveEvent().Subscribe(*this, &PlayerInputs::HandleMouseMoved);
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Engine.h"
+#include "GameEngine/GameEngine.h"
 #include "Player.h"
 
 namespace Sinistar
@@ -10,7 +10,7 @@ namespace Sinistar
 		Weave::Graphics::Renderer* renderer;
 
 	public:
-		CameraManager(Weave::Engine& engine);
+		CameraManager(Weave::GameEngine& engine);
 
 		void UpdateCamera(Weave::ECS::World& world);
 	};

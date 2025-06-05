@@ -1,7 +1,7 @@
 #pragma once
 #include "Player.h"
 
-Weave::ECS::EntityID Sinistar::CreatePlayer(Weave::Engine& engine)
+Weave::ECS::EntityID Sinistar::CreatePlayer(Weave::GameEngine& engine)
 {
 	std::shared_ptr<sf::Texture> playerTexture = engine.GetRenderer().GetTexture("spritesheet_player_11x11.png");
 	Weave::Graphics::SpriteSheet playerSpritesheet(playerTexture, Weave::Mathematics::Vector2<uint16_t>(11, 11));

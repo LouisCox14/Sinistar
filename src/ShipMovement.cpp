@@ -1,10 +1,7 @@
 #pragma once
 #include "ShipMovement.h"
 
-void Sinistar::ApplyShipAcceleration(Weave::ECS::World& world)
+void Sinistar::ApplyShipAcceleration(Weave::ECS::EntityID entity, ShipMovement& shipMovement, Weave::Physics::Rigidbody& rigidbody)
 {
-	for (auto [entity, shipMovement, rigidbody] : world.GetView<ShipMovement, Weave::Physics::Rigidbody>())
-	{
-		rigidbody.acceleration += shipMovement.direction * shipMovement.speed;
-	}
+	rigidbody.acceleration += shipMovement.direction * shipMovement.speed;
 }

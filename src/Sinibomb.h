@@ -1,6 +1,6 @@
 #pragma once
-#include "Engine/Engine.h"
-#include "Engine/Physics.h"
+#include "GameEngine/GameEngine.h"
+#include "GameEngine/Physics.h"
 #include "Health.h"
 #include "CollisionLayers.h"
 
@@ -24,7 +24,7 @@ namespace Sinistar
 		Weave::ECS::EntityID CreateSinibomb(Weave::ECS::World& world, Weave::Mathematics::Vector2<float> position);
 
 	public:
-		SinibombManager(Weave::Engine& engine);
+		SinibombManager(Weave::GameEngine& engine);
 
 		void UpdateSinicrystalHolders(Weave::ECS::World& world);
 		void UpdateSinicrystals(Weave::ECS::World& world);
